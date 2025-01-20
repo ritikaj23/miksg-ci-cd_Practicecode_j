@@ -1,4 +1,4 @@
-package com.services.services.controller;
+package com.services.services;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -6,64 +6,48 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/")
 public class CounterController {
     
     private static final Logger logger = LoggerFactory.getLogger(CounterController.class);
-    private final Map<String, Integer> COUNTER = new HashMap<>();
+    private final ConcurrentHashMap<String, Integer> COUNTER = new ConcurrentHashMap<>();
 
-    /**
-     * Health Status endpoint
-     */
     @GetMapping("/health")
     public ResponseEntity<Map<String, String>> health() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "OK");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("status", "OK"));
     }
 
-    /**
-     * Index page with service information
-     */
     @GetMapping
     public ResponseEntity<Map<String, Object>> index() {
         logger.info("Request for Base URL");
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", HttpStatus.OK.value());
-        response.put("message", "Hit Counter Service");
-        response.put("version", "1.0.0");
-        response.put("url", ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/counters")
-                .toUriString());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+            "status", HttpStatus.OK.value(),
+            "message", "Hit Counter Service",
+            "version", "1.0.0",
+            "url", ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/counters")
+                    .toUriString()
+        ));
     }
 
-    /**
-     * Lists all counters
-     */
     @GetMapping("/counters")
     public ResponseEntity<List<Map<String, Object>>> listCounters() {
         logger.info("Request to list all counters...");
         List<Map<String, Object>> counters = new ArrayList<>();
-        COUNTER.forEach((name, value) -> {
-            Map<String, Object> counter = new HashMap<>();
-            counter.put("name", name);
-            counter.put("counter", value);
-            counters.add(counter);
-        });
+        COUNTER.forEach((name, value) -> 
+            counters.add(Map.of("name", name, "counter", value))
+        );
         return ResponseEntity.ok(counters);
     }
 
-    /**
-     * Creates a new counter
-     */
     @PostMapping("/counters/{name}")
     public ResponseEntity<Map<String, Object>> createCounter(@PathVariable String name) {
         logger.info("Request to Create counter: {}...", name);
@@ -81,58 +65,40 @@ public class CounterController {
             .buildAndExpand(name)
             .toUri();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("name", name);
-        response.put("counter", 0);
-        
         return ResponseEntity
             .created(location)
-            .body(response);
+            .body(Map.of("name", name, "counter", 0));
     }
 
-    /**
-     * Reads a single counter
-     */
     @GetMapping("/counters/{name}")
     public ResponseEntity<Map<String, Object>> readCounter(@PathVariable String name) {
         logger.info("Request to Read counter: {}...", name);
         
-        if (!COUNTER.containsKey(name)) {
+        Integer value = COUNTER.get(name);
+        if (value == null) {
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", String.format("Counter %s does not exist", name)));
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("name", name);
-        response.put("counter", COUNTER.get(name));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("name", name, "counter", value));
     }
 
-    /**
-     * Updates a counter
-     */
     @PutMapping("/counters/{name}")
     public ResponseEntity<Map<String, Object>> updateCounter(@PathVariable String name) {
         logger.info("Request to Update counter: {}...", name);
         
-        if (!COUNTER.containsKey(name)) {
+        Integer value = COUNTER.get(name);
+        if (value == null) {
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", String.format("Counter %s does not exist", name)));
         }
 
-        COUNTER.put(name, COUNTER.get(name) + 1);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("name", name);
-        response.put("counter", COUNTER.get(name));
-        return ResponseEntity.ok(response);
+        int newValue = COUNTER.compute(name, (k, v) -> v + 1);
+        return ResponseEntity.ok(Map.of("name", name, "counter", newValue));
     }
 
-    /**
-     * Deletes a counter
-     */
     @DeleteMapping("/counters/{name}")
     public ResponseEntity<Void> deleteCounter(@PathVariable String name) {
         logger.info("Request to Delete counter: {}...", name);
@@ -140,9 +106,6 @@ public class CounterController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Clear all counters - for testing only
-     */
     public void resetCounters() {
         COUNTER.clear();
     }
