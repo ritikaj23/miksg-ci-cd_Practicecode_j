@@ -24,6 +24,6 @@ jobs:
 
       - name: Run checkstyle
         run: mvn checkstyle:check
-
+        
       - name: Run tests with Jacoco
         run: mvn test jacoco:report
