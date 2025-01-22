@@ -19,11 +19,18 @@ jobs:
         with:
           maven-version: '3.9.6'
 
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+         
       - name: Build and install with Maven
-        run: mvn clean install
+        run: mvn clean install -B -V
 
       - name: Run checkstyle
         run: mvn checkstyle:check
-        
+
       - name: Run tests with Jacoco
         run: mvn test jacoco:report
