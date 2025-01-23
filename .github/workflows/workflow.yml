@@ -20,7 +20,7 @@ jobs:
           maven-version: '3.9.6'
 
       - name: Build and install with Maven
-        run: mvn clean instal
+        run: mvn clean install
 
       - name: Run checkstyle
         run: mvn checkstyle:check
