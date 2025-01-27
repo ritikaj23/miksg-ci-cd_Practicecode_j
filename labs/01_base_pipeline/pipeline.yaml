@@ -1,0 +1,64 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cd-pipeline
+spec:
+  params:
+    - name: repo-url
+    - name: branch
+      default: "master"
+  tasks:
+    - name: clone
+      taskRef:
+        name: checkout
+      params:
+      - name: repo-url
+        value: "$(params.repo-url)"
+      - name: branch
+        value: "$(params.branch)"
+
+    - name: setup-maven
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Setting up Maven..."
+      runAfter:
+        - clone
+
+    - name: build
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value:  "Building image for $(params.repo-url) ..."
+      runAfter:
+        - setup-maven
+
+    - name: lint
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Linting code with CheckStyle..."
+      runAfter:
+        - build
+  
+    - name: tests
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Running unit tests with Junit..."
+      runAfter:
+        - lint
+
+    - name: deploy
+      taskRef:
+        name: echo
+      params:
+      - name: message
+        value: "Deploying $(params.branch) branch of $(params.repo-url) ..."
+      runAfter:
+        - tests
