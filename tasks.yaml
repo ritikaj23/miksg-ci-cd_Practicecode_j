@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: maven-jacoco-report
+spec:
+  workspaces:
+    - name: source
+      description: The workspace containing the source code to build
+
+  params:
+    - name: MAVEN_IMAGE
+      type: string
+      default: maven:3.9.6-eclipse-temurin-21
+      description: Maven image to use for building and testing
+
+  steps:
+    - name: maven-settings
+      image: $(params.MAVEN_IMAGE)
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/bash
+        mkdir -p /root/.m2
+        cat > /root/.m2/settings.xml << EOF
+        <settings>
+          <mirrors>
+            <mirror>
+              <id>central</id>
+              <name>Maven Central</name>
+              <url>https://repo.maven.apache.org/maven2</url>
+              <mirrorOf>*</mirrorOf>
+            </mirror>
+          </mirrors>
+        </settings>
+        EOF
+
+    - name: build-and-test
+      image: $(params.MAVEN_IMAGE)
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/bash
+        mvn clean test \
+          -DargLine="-javaagent:/home/theia/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=$(workspaces.source.path)/target/jacoco.exec"
+
+    - name: generate-jacoco-report
+      image: $(params.MAVEN_IMAGE)
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/bash
+        mvn jacoco:report
+
+  results:
+    - name: jacoco-report
+      description: Path to the generated JaCoCo report
