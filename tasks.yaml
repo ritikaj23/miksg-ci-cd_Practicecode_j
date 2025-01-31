@@ -9,18 +9,28 @@ spec:
   steps:
     - name: remove
       image: alpine:3
+      env:
+        - name: WORKSPACE_SOURCE_PATH
+          value: $(workspaces.source.path)
       workingDir: $(workspaces.source.path)
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
       script: |
         #!/usr/bin/env sh
-        set -euo pipefail
-
-        WORKSPACE_PATH="$(workspaces.source.path)"
-        echo "Cleaning up workspace at $WORKSPACE_PATH ..."
-
-        # Ensure the workspace directory exists
-        if [ ! -d "$WORKSPACE_PATH" ]; then
-          echo "Workspace directory does not exist: $WORKSPACE_PATH"
-          exit 1
+        set -eu
+        echo "Removing all files from ${WORKSPACE_SOURCE_PATH} ..."
+        # Delete any existing contents of the directory if it exists.
+        #
+        # We don't just "rm -rf ${WORKSPACE_SOURCE_PATH}" because ${WORKSPACE_SOURCE_PATH} might be "/"
+        # or the root of a mounted volume.
+        if [ -d "${WORKSPACE_SOURCE_PATH}" ] ; then
+          # Delete non-hidden files and directories
+          rm -rf "${WORKSPACE_SOURCE_PATH:?}"/*
+          # Delete files and directories starting with . but excluding ..
+          rm -rf "${WORKSPACE_SOURCE_PATH}"/.[!.]*
+          # Delete files and directories starting with .. plus any other character
+          rm -rf "${WORKSPACE_SOURCE_PATH}"/..?*
         fi
 ---
 apiVersion: tekton.dev/v1beta1
