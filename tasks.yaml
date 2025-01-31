@@ -61,7 +61,7 @@ spec:
   params:
     - name: MAVEN_IMAGE
       type: string
-      default: maven:3.9.6-eclipse-temurin-17
+      default: maven:3.9.6-eclipse-temurin-21
       description: Maven image to use for building and testing
 
   steps:
