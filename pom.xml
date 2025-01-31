@@ -61,14 +61,14 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.14.10</version>
+            <version>1.15.4</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <version>1.14.10</version>
+            <version>1.15.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -88,13 +88,7 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <argLine>
-                        --add-opens java.base/java.lang=ALL-UNNAMED
-                        --add-opens java.base/java.io=ALL-UNNAMED
-                        --add-opens java.base/java.util=ALL-UNNAMED
-                        --add-opens java.base/java.util.concurrent=ALL-UNNAMED
-                        ${surefire.jacoco.args}
-                    </argLine>
+                    <argLine>-javaagent:/root/.m2/repository/net/bytebuddy/byte-buddy-agent/${byte-buddy.version}/byte-buddy-agent-${byte-buddy.version}.jar</argLine>
                 </configuration>
             </plugin>
 
