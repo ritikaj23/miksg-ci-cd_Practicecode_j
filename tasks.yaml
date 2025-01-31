@@ -56,7 +56,7 @@ spec:
   params:
     - name: MAVEN_IMAGE
       type: string
-      default: maven:3.9.6-eclipse-temurin-21
+      default: maven:3.9.6-eclipse-temurin-17
       description: Maven image to use for building and testing
 
   steps:
@@ -86,3 +86,4 @@ spec:
         #!/bin/bash
         mvn clean verify \
           -DargLine="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED"
+          
