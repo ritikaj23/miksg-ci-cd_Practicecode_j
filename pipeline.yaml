@@ -1,29 +1,81 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: maven-jacoco-pipeline
+  name: cd-pipeline
 spec:
+  params:
+    - name: repo-url
+      type: string
+    - name: branch
+      type: string
+      default: "master"
+  
   workspaces:
     - name: source
-  
-  tasks:
-    - name: git-clone
-      taskRef:
-        name: git-clone
-      workspaces:
-        - name: output
-          workspace: source
-      params:
-        - name: url
-          value: https://github.com/ibm-developer-skills-network/miksg-ci-cd_Practicecode_j.git
-        - name: revision
-          value: main
 
-    - name: maven-jacoco-report
+  tasks:
+    - name: init
       taskRef:
-        name: maven-jacoco-report
-      runAfter:
-        - git-clone
+        name: cleanup
       workspaces:
         - name: source
           workspace: source
+
+    - name: clone
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: "$(params.repo-url)"
+        - name: revision
+          value: "$(params.branch)"
+      workspaces:
+        - name: output
+          workspace: source
+      runAfter:
+        - init
+
+    - name: lint
+      taskRef:
+        name: checkstyle
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter: 
+        - clone
+
+    - name: tests
+      taskRef:
+        name: run-tests
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter:
+        - lint
+
+    - name: setup-maven
+      taskRef:
+        name: echo
+      params:
+        - name: message
+          value: "Setting up Maven..."
+      runAfter:
+        - tests
+
+    - name: build
+      taskRef:
+        name: echo
+      params:
+        - name: message
+          value: "Building image for $(params.repo-url) ..."
+      runAfter:
+        - setup-maven
+
+    - name: deploy
+      taskRef:
+        name: echo
+      params:
+        - name: message
+          value: "Deploying $(params.branch) branch of $(params.repo-url) ..."
+      runAfter:
+        - build
