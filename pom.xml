@@ -74,8 +74,7 @@
         <includes>
             <include>**/*Test.java</include>
         </includes>
-        <argLine>
-            -javaagent:/home/theia/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=${project.build.directory}/jacoco.exec
+        <argLine>                 
             --add-opens java.base/java.lang=ALL-UNNAMED
             --add-opens java.base/java.io=ALL-UNNAMED
             --add-opens java.base/java.util=ALL-UNNAMED
