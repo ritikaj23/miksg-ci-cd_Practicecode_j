@@ -18,6 +18,12 @@
     <description>Counter service implementation</description>
     
     <properties>
+	 <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <junit-jupiter-engine.version>5.9.1</junit-jupiter-engine.version>    
         <java.version>21</java.version>
         <jacoco.version>0.8.12</jacoco.version>
         <mockito.version>5.0.0</mockito.version> <!-- Updated Mockito version -->
@@ -62,7 +68,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>3.5.2</version>
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
