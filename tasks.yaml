@@ -90,5 +90,5 @@ spec:
       script: |
         #!/bin/bash
         mvn test \
-          -DargLine="-javaagent:/root/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.4/byte-buddy-agent-1.15.4.jar"
+          -DargLine="-javaagent:/root/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.10/byte-buddy-agent-1.14.10.jar"
           
