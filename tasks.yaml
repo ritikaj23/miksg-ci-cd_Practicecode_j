@@ -14,19 +14,14 @@ spec:
         #!/usr/bin/env sh
         set -euo pipefail
 
-        echo "Cleaning up workspace at $(workspaces.source.path) ..."
+        WORKSPACE_PATH="$(workspaces.source.path)"
+        echo "Cleaning up workspace at $WORKSPACE_PATH ..."
 
         # Ensure the workspace directory exists
-        if [ ! -d "$(workspaces.source.path)" ]; then
-          echo "Workspace directory does not exist: $(workspaces.source.path)"
+        if [ ! -d "$WORKSPACE_PATH" ]; then
+          echo "Workspace directory does not exist: $WORKSPACE_PATH"
           exit 1
         fi
-
-        # Delete all files and directories in the workspace
-        echo "Deleting files and directories..."
-        find "$(workspaces.source.path)" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-
-        echo "Workspace cleanup complete."
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
